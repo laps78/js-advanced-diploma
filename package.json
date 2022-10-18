@@ -1,0 +1,23 @@
+{
+  "name": "retro-game",
+  "version": "1.0.0",
+  "description": "Дипломное задание к курсу «Продвинутый JavaScript». Retro Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laps78/js-advanced-diploma.git"
+  },
+  "author": "L.A.P.S.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laps78/js-advanced-diploma/issues"
+  },
+  "homepage": "https://github.com/laps78/js-advanced-diploma#readme",
+  "devDependencies": {
+    "eslint": "^8.25.0"
+  }
+}
