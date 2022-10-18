@@ -16,6 +16,10 @@
       "no-alert": "off",
       "arrow-parens": "warn",
       "class-methods-use-this": "warn",
-      "no-restricted-syntax": "warn"
+      "no-restricted-syntax": [
+        "error",
+        "LabeledStatement",
+        "WithStatement"
+      ]
     }
 }
