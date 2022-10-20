@@ -8,6 +8,7 @@ const types = [
 ];
 export default class Character {
   constructor(type) {
+    if (new.target.name === 'Character') throw new Error('Parent constructor <Character> can not be envoked directly!');
     if (types.includes(type)) {
       this.type = type;
     } else {
