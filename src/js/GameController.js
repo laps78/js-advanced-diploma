@@ -1,4 +1,4 @@
-import GamePlay from './GamePlay';
+import themes from './themes';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -7,7 +7,7 @@ export default class GameController {
   }
 
   init() {
-    this.gamePlay.drawUi('prairie');// TODO: необходимо привязать тему к уровню
+    this.gamePlay.drawUi(themes.prairie);
     // TODO: add event listeners to gamePlay events
     // TODO: load saved stated from stateService
   }
