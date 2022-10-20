@@ -1,0 +1,12 @@
+import Vampire from '../characters/Vampire';
+
+test('должен создаваться правильный вампир', () => {
+  const etalonVampire = {
+    type: 'vampire',
+    health: 100,
+    level: 2,
+    attack: 25,
+    defence: 25,
+  };
+  expect(new Vampire(2)).toEqual(etalonVampire);
+});
