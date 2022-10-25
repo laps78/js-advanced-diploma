@@ -32,5 +32,5 @@ test.each([
 test.each([
   [generateTeam(aviableCharacterClasses, 4, 1), 4],
 ])('тест учета аргумента maxLevel', (call, maxLevel) => {
-  expect(call.characters[0].level).toBeLessThan(maxLevel);
+  expect(call.characters[0].level).toBeLessThanOrEqual(maxLevel);
 });

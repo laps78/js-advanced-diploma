@@ -21,6 +21,10 @@
         "error",
         "LabeledStatement",
         "WithStatement"
-      ]
+      ],
+      "prefer-destructuring": ["error", {
+        "object": true,
+        "array": false
+      }]
     }
 }

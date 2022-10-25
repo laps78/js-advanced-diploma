@@ -7,6 +7,7 @@ import Daemon from './characters/Daemon';
 import Undead from './characters/Undead';
 import Vampire from './characters/Vampire';
 import PositionedCharacter from './PositionedCharacter';
+import GamePlay from './GamePlay';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -27,6 +28,9 @@ export default class GameController {
     };
     this.charactersPositions = [];
     this.init();
+    this.players = ['player', 'cpu'];
+    this.turn = this.players[0];
+    this.selectedCell = null;
   }
 
   init() {
@@ -69,11 +73,24 @@ export default class GameController {
     // TODO: add event listeners to gamePlay events
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
+    this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
     // TODO: load saved stated from stateService
   }
 
   onCellClick(index) {
     // TODO: react to click
+    if (this.charactersPositions.includes(index)) {
+      const characterInCell = this.detectCharacterInCell(index);
+      if (characterInCell.character instanceof Swordsman || characterInCell.character instanceof Bowman || characterInCell.character instanceof Magician) {
+        if (this.selectedCell) this.gamePlay.deselectCell(this.selectedCell);
+        this.selectedCell = index;
+        this.gamePlay.selectCell(this.selectedCell);
+      } else {
+        GamePlay.showError('It\'s an enemy, dude!');
+      }
+    } else {
+      GamePlay.showError('Nobody here, dude!');
+    }
   }
 
   onCellEnter(index) {
@@ -88,9 +105,23 @@ export default class GameController {
     this.gamePlay.hideCellTooltip(index);
   }
 
-  showCharacterInCellInfo(index) {
+  detectCharacterInCell(index) {
     const characterInCell = this.allCharactersOnMap.find((character) => character.position === index);
+    return characterInCell;
+  }
+
+  showCharacterInCellInfo(index) {
+    const characterInCell = this.detectCharacterInCell(index);
     const message = `🎖 ${characterInCell.character.level} ⚔ ${characterInCell.character.attack} 🛡 ${characterInCell.character.defence} ♥ ${characterInCell.character.health}`;
     return message;
+  }
+
+  changeTurn() {
+    if (this.turn === this.players[0]) {
+      this.turn = this.players[1];
+    } else {
+      this.turn = this.players[0];
+    }
+    return this.turn;
   }
 }
