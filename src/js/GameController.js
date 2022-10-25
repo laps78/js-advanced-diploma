@@ -25,6 +25,7 @@ export default class GameController {
         6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55, 62, 63, // possible start positions for CPU's team
       ],
     };
+    this.charactersPositions = [];
     this.init();
   }
 
@@ -43,17 +44,14 @@ export default class GameController {
 
     // Init & dispose player team
     this.playerTeam = generateTeam(this.globalOptions.playerTeamAllowedTypes, this.globalOptions.maxLevel, this.globalOptions.teamCount);
-    /* disposal */
     this.playerTeam.characters.forEach((character, characterIndex) => {
       const generatePlayerPosition = positionRandomizer(this.globalOptions.playerAllowedPositions);
-      const newRandomPosition = generatePlayerPosition.next().value;
-      const positionedCharacter = new PositionedCharacter(character, newRandomPosition);
+      const positionedCharacter = new PositionedCharacter(character, generatePlayerPosition.next().value);
       this.playerTeam.characters[characterIndex] = positionedCharacter;
     });
 
     // Init & dispose CPU team
     this.cpuTeam = generateTeam(this.globalOptions.cpuTeamAllowedTypes, this.globalOptions.maxLevel, this.globalOptions.teamCount);
-    // disposal
     this.cpuTeam.characters.forEach((character, characterIndex) => {
       const generateCPUPosition = positionRandomizer(this.globalOptions.cpuAllowedPositions);
       const positionedCharacter = new PositionedCharacter(character, generateCPUPosition.next().value);
@@ -61,9 +59,16 @@ export default class GameController {
     });
 
     /* render */
-    this.gamePlay.redrawPositions([...this.cpuTeam.characters, ...this.playerTeam.characters]);
+    // Создаем массив всех персонажей на поле
+    this.allCharactersOnMap = [...this.cpuTeam.characters, ...this.playerTeam.characters];
+    // вносим координаты всех персонажей в массив координат
+    this.charactersPositions = this.allCharactersOnMap.map((character) => character.position);
+    // отрисовываем персонажей на поле
+    this.gamePlay.redrawPositions(this.allCharactersOnMap);
 
     // TODO: add event listeners to gamePlay events
+    this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
+    this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     // TODO: load saved stated from stateService
   }
 
@@ -73,9 +78,19 @@ export default class GameController {
 
   onCellEnter(index) {
     // TODO: react to mouse enter
+    if (this.charactersPositions.includes(index)) {
+      this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
+    }
   }
 
   onCellLeave(index) {
     // TODO: react to mouse leave
+    this.gamePlay.hideCellTooltip(index);
+  }
+
+  showCharacterInCellInfo(index) {
+    const characterInCell = this.allCharactersOnMap.find((character) => character.position === index);
+    const message = `🎖 ${characterInCell.character.level} ⚔ ${characterInCell.character.attack} 🛡 ${characterInCell.character.defence} ♥ ${characterInCell.character.health}`;
+    return message;
   }
 }
