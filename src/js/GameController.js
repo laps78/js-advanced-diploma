@@ -1,9 +1,80 @@
 import themes from './themes';
+import { generateTeam } from './generators';
+import Swordsman from './characters/Swordsman';
+import Bowman from './characters/Bowman';
+import Magician from './characters/Magician';
+import Daemon from './characters/Daemon';
+import Undead from './characters/Undead';
+import Vampire from './characters/Vampire';
+import PositionedCharacter from './PositionedCharacter';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    // L.A.P.S. codes
+    this.globalOptions = {
+      maxLevel: 4, // maximum character's level
+      teamCount: 3, // team size
+      playerTeamAllowedTypes: [Swordsman, Bowman, Magician], // allowed characters for player's team
+      cpuTeamAllowedTypes: [Daemon, Undead, Vampire], // allowed characters for CPU's team
+      playerAllowedPositions: [
+        0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56, 57, // possible start positions for player's team
+      ],
+      cpuAllowedPositions: [
+        6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55, 62, 63, // possible start positions for CPU's team
+      ],
+    };
+    // generates random position from array of allowed
+    function getRandomPosition(allowedPositions) {
+      const allowedPositionIndex = Math.floor(Math.random() * allowedPositions.length);
+      return allowedPositions[allowedPositionIndex];
+    }
+    // generates unique random position from array of allowed
+    function* positionRandomizer(allowedPositions) {
+      const usedPositions = [];
+      while (true) {
+        let characterIsPositioned = false;
+        while (characterIsPositioned === false) {
+          const newRandomPosition = getRandomPosition(allowedPositions);
+          console.log('newRandomPosition: ', newRandomPosition);
+          console.log('usedPositions before if: ', usedPositions);
+          if (usedPositions.indexOf(newRandomPosition) === -1) {
+            console.log('new position is not used. used: ', usedPositions);
+            usedPositions.push(newRandomPosition);
+            console.log('used positions after push: ', usedPositions);
+            characterIsPositioned = true;
+            yield newRandomPosition;
+          }
+          console.log(`position: ${newRandomPosition} is useed in ${usedPositions}`);
+        }
+      }
+    }
+
+    // Init & dispose player team
+    this.playerTeam = generateTeam(this.globalOptions.playerTeamAllowedTypes, this.globalOptions.maxLevel, this.globalOptions.teamCount);
+    /* disposal */
+    this.playerTeam.characters.forEach((character, characterIndex) => {
+      const generatePlayerPosition = positionRandomizer(this.globalOptions.playerAllowedPositions);
+      const positionedCharacter = new PositionedCharacter(character, generatePlayerPosition.next().value);
+      this.playerTeam.characters[characterIndex] = positionedCharacter;
+    });
+    console.log('playerTeam.characters:', this.playerTeam.characters);
+    /* render */
+    gamePlay.redrawPositions(this.playerTeam.characters);
+    /*
+    // Init & dispose CPU team
+    this.cpuTeam = generateTeam(this.globalOptions.cpuTeamAllowedTypes, this.globalOptions.maxLevel, this.globalOptions.teamCount);
+    // disposal
+    this.cpuTeam.characters.forEach((character, characterIndex) => {
+      const generateCPUPosition = positionRandomizer(this.globalOptions.cpuAllowedPositions);
+      const positionedCharacter = new PositionedCharacter(character, generateCPUPosition.next().value);
+      this.cpuTeam.characters[characterIndex] = positionedCharacter;
+    });
+    console.log('cpuTeam.characters:', this.cpuTeam.characters);
+    */
+    /* render */
+    gamePlay.redrawPositions(this.cpuTeam.characters);
   }
 
   init() {

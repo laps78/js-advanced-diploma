@@ -13,11 +13,12 @@ import Team from './Team';
 export function* characterGenerator(allowedTypes, maxLevel) {
   // TODO: write logic here
   while (true) {
-    yield () => {
-      const randomClassIndex = Math.floor(Math.random() * allowedTypes.length - 1);
+    yield (() => {
+      const randomClassIndex = Math.floor(Math.random() * allowedTypes.length);
       const randomLevel = Math.floor(Math.random() * (maxLevel)) + 1;
-      return allowedTypes[randomClassIndex](randomLevel);
-    };
+      const newCharacter = new allowedTypes[randomClassIndex](randomLevel);
+      return newCharacter;
+    })();
   }
 }
 
@@ -32,7 +33,8 @@ export function generateTeam(allowedTypes, maxLevel, characterCount) {
   // TODO: write logic here
   const team = new Team();
   for (let i = 0; i <= characterCount; i += 1) {
-    team.addCharacter(characterGenerator(allowedTypes, maxLevel));
+    const generatorWork = characterGenerator(allowedTypes, maxLevel);
+    team.addCharacter(generatorWork.next().value);
   }
   return team;
 }
