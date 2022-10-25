@@ -25,29 +25,19 @@ export default class GameController {
         6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55, 62, 63, // possible start positions for CPU's team
       ],
     };
+    this.init();
+  }
+
+  init() {
+    this.gamePlay.drawUi(themes.prairie);
+
     // generates random position from array of allowed
-    function getRandomPosition(allowedPositions) {
-      const allowedPositionIndex = Math.floor(Math.random() * allowedPositions.length);
-      return allowedPositions[allowedPositionIndex];
-    }
-    // generates unique random position from array of allowed
     function* positionRandomizer(allowedPositions) {
-      const usedPositions = [];
       while (true) {
-        let characterIsPositioned = false;
-        while (characterIsPositioned === false) {
-          const newRandomPosition = getRandomPosition(allowedPositions);
-          console.log('newRandomPosition: ', newRandomPosition);
-          console.log('usedPositions before if: ', usedPositions);
-          if (usedPositions.indexOf(newRandomPosition) === -1) {
-            console.log('new position is not used. used: ', usedPositions);
-            usedPositions.push(newRandomPosition);
-            console.log('used positions after push: ', usedPositions);
-            characterIsPositioned = true;
-            yield newRandomPosition;
-          }
-          console.log(`position: ${newRandomPosition} is useed in ${usedPositions}`);
-        }
+        const allowedPositionIndex = Math.floor(Math.random() * allowedPositions.length);
+        const newPosition = allowedPositions[allowedPositionIndex];
+        allowedPositions.splice(allowedPositionIndex, 1);
+        yield newPosition;
       }
     }
 
@@ -56,13 +46,11 @@ export default class GameController {
     /* disposal */
     this.playerTeam.characters.forEach((character, characterIndex) => {
       const generatePlayerPosition = positionRandomizer(this.globalOptions.playerAllowedPositions);
-      const positionedCharacter = new PositionedCharacter(character, generatePlayerPosition.next().value);
+      const newRandomPosition = generatePlayerPosition.next().value;
+      const positionedCharacter = new PositionedCharacter(character, newRandomPosition);
       this.playerTeam.characters[characterIndex] = positionedCharacter;
     });
-    console.log('playerTeam.characters:', this.playerTeam.characters);
-    /* render */
-    gamePlay.redrawPositions(this.playerTeam.characters);
-    /*
+
     // Init & dispose CPU team
     this.cpuTeam = generateTeam(this.globalOptions.cpuTeamAllowedTypes, this.globalOptions.maxLevel, this.globalOptions.teamCount);
     // disposal
@@ -71,14 +59,10 @@ export default class GameController {
       const positionedCharacter = new PositionedCharacter(character, generateCPUPosition.next().value);
       this.cpuTeam.characters[characterIndex] = positionedCharacter;
     });
-    console.log('cpuTeam.characters:', this.cpuTeam.characters);
-    */
-    /* render */
-    gamePlay.redrawPositions(this.cpuTeam.characters);
-  }
 
-  init() {
-    this.gamePlay.drawUi(themes.prairie);
+    /* render */
+    this.gamePlay.redrawPositions([...this.cpuTeam.characters, ...this.playerTeam.characters]);
+
     // TODO: add event listeners to gamePlay events
     // TODO: load saved stated from stateService
   }
