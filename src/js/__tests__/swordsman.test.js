@@ -7,6 +7,8 @@ test('должен создаваться правильный мечник', ()
     level: 2,
     attack: 40,
     defence: 10,
+    moveRange: 4,
+    attackRange: 1,
   };
   expect(new Swordsman(2)).toEqual(etalonSwordsman);
 });

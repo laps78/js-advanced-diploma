@@ -7,6 +7,8 @@ test('должен создаваться правильная нежить', ()
     level: 2,
     attack: 40,
     defence: 10,
+    moveRange: 4,
+    attackRange: 1,
   };
   expect(new Undead(2)).toEqual(etalonUndead);
 });

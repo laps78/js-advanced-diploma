@@ -7,6 +7,8 @@ test('должен создаваться правильный демон', () =
     level: 2,
     attack: 10,
     defence: 10,
+    moveRange: 1,
+    attackRange: 4,
   };
   expect(new Daemon(2)).toEqual(etalonDaemon);
 });
