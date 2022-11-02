@@ -97,12 +97,18 @@ export default class GameController {
     // TODO: react to mouse enter
     if (this.charactersPositions.includes(index)) {
       this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
+      // TODO change cursor if character in cell is player's
+      const characterInCell = this.detectCharacterInCell(index);
+      if (characterInCell.character instanceof Swordsman || characterInCell.character instanceof Bowman || characterInCell.character instanceof Magician) {
+        this.gamePlay.setCursor('pointer');
+      }
     }
   }
 
   onCellLeave(index) {
     // TODO: react to mouse leave
     this.gamePlay.hideCellTooltip(index);
+    this.gamePlay.setCursor('auto');
   }
 
   detectCharacterInCell(index) {
