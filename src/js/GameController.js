@@ -115,10 +115,17 @@ export default class GameController {
     if (this.charactersPositions.includes(index)) {
       this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
       // TODO change cursor if character in cell is player's
-      const characterInCell = this.detectCharacterInCell(index);
-      if (characterInCell.character instanceof Swordsman || characterInCell.character instanceof Bowman || characterInCell.character instanceof Magician) {
+      const characterInCell = this.detectCharacterInCell(index).character;
+      if (characterInCell instanceof Swordsman || characterInCell instanceof Bowman || characterInCell instanceof Magician) {
+        this.gamePlay.setCursor('pointer');
+      } else {
+        this.gamePlay.setCursor('not-allowed');
+      }
+      /* TODO FIND A BUG HERE
+      if (this.selectedCell && this.defineAllowedMoves(this.selectedCell).includes(index)) {
         this.gamePlay.setCursor('pointer');
       }
+      */
     }
   }
 
@@ -130,7 +137,7 @@ export default class GameController {
 
   /**
    * If there's character in cell returns it
-   * @param {*} index index of testing cell
+   * @param index index of testing cell
    * @returns character from allCharactersOnMap array
    */
   detectCharacterInCell(index) {
@@ -191,21 +198,132 @@ export default class GameController {
    */
   defineAllowedMoves(index) {
     const characterInCell = this.detectCharacterInCell(index).character;
+    const range = characterInCell.moveRange;
     const allowedMoves = [];
-    for (let step = 1; step <= characterInCell.moveRange; step += 1) {
-      for (let i = 0; i < 8; i += 1) {
-        // go up
-        // go up-right
-        // go right
-        // go right-down
-        // go down
-        // go left-down
-        // go left
-        // go left-up
-        // exclude occupied cells
-        // exclude steps out of borders
+
+    function addDirectionUp(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition - (this.gamePlay.boardSize * step);
+        allowedMoves.push(move);
       }
     }
+
+    function addDirectionUpRight(currentPosition, steps) {
+      // TODO
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition - ((this.gamePlay.boardSize + 1) * step);
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionRight(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition + step;
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionRightDown(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition + ((this.gamePlay.boardSize + 1) * step);
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionDown(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition + (this.gamePlay.boardSize * step);
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionLeftDown(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition + ((this.gamePlay.boardSize - 1) * step);
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionLeft(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition - step;
+        allowedMoves.push(move);
+      }
+    }
+
+    function addDirectionLeftUp(currentPosition, steps) {
+      for (let step = 1; step <= steps; step += 1) {
+        const move = currentPosition - ((this.gamePlay.boardSize - 1) * step);
+        allowedMoves.push(move);
+      }
+    }
+
+    function excludeOccupiedCells() {
+      return allowedMoves.filter((move) => !this.charactersPositions.includes(move));
+    }
+
+    switch (index) {
+      case (index === this.fieldBorders.topLeft):
+        addDirectionRight(index, range);
+        addDirectionRightDown(index, range);
+        addDirectionDown(index, range);
+        break;
+      case (index === this.fieldBorders.topRight):
+        addDirectionLeft(index, range);
+        addDirectionLeftDown(index, range);
+        addDirectionDown(index, range);
+        break;
+      case (index === this.fieldBorders.bottomRight):
+        addDirectionLeft(index, range);
+        addDirectionLeftUp(index, range);
+        addDirectionUp(index, range);
+        break;
+      case (index === this.fieldBorders.bottomLeft):
+        addDirectionUp(index, range);
+        addDirectionUpRight(index, range);
+        addDirectionRight(index, range);
+        break;
+      case this.fieldBorders.top.includes(index):
+        addDirectionRight(index, range);
+        addDirectionRightDown(index, range);
+        addDirectionDown(index, range);
+        addDirectionLeftDown(index, range);
+        addDirectionLeft(index, range);
+        break;
+      case this.fieldBorders.right.includes(index):
+        addDirectionUp(index, range);
+        addDirectionDown(index, range);
+        addDirectionLeftDown(index, range);
+        addDirectionLeft(index, range);
+        addDirectionLeftUp(index, range);
+        break;
+      case this.fieldBorders.bottom.includes(index):
+        addDirectionUp(index, range);
+        addDirectionUpRight(index, range);
+        addDirectionRight(index, range);
+        addDirectionLeft(index, range);
+        addDirectionLeftUp(index, range);
+        break;
+      case this.fieldBorders.left.includes(index):
+        addDirectionUp(index, range);
+        addDirectionUpRight(index, range);
+        addDirectionRight(index, range);
+        addDirectionRightDown(index, range);
+        addDirectionDown(index, range);
+        break;
+      default:
+        addDirectionUp(index, range);
+        addDirectionUpRight(index, range);
+        addDirectionRight(index, range);
+        addDirectionRightDown(index, range);
+        addDirectionDown(index, range);
+        addDirectionLeftDown(index, range);
+        addDirectionLeft(index, range);
+        addDirectionLeftUp(index, range);
+        break;
+    }
+    debugger;
+    excludeOccupiedCells();
     return allowedMoves;
   }
 
