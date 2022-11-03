@@ -97,8 +97,8 @@ export default class GameController {
   onCellClick(index) {
     // TODO: react to click
     if (this.charactersPositions.includes(index)) {
-      const characterInCell = this.detectCharacterInCell(index);
-      if (characterInCell.character instanceof Swordsman || characterInCell.character instanceof Bowman || characterInCell.character instanceof Magician) {
+      const characterInCell = this.detectCharacterInCell(index).character;
+      if (characterInCell instanceof Swordsman || characterInCell instanceof Bowman || characterInCell instanceof Magician) {
         if (this.selectedCell) this.gamePlay.deselectCell(this.selectedCell);
         this.selectedCell = index;
         this.gamePlay.selectCell(this.selectedCell);
@@ -148,8 +148,28 @@ export default class GameController {
    * @returns array of border's cells indexes
    */
   defineFieldBorders() {
-    const borderIndexes = [];
+    const borderIndexes = {
+      topLeft: null,
+      top: [],
+      topRight: null,
+      right: [],
+      bottomRight: [],
+      bottom: [],
+      bottomLeft: null,
+      left: [],
+      allBorders: [],
+    };
+
     this.gamePlay.cells.forEach((cell, index) => {
+      if (cell.classList.contains('map-tile-top-left')) borderIndexes.topLeft = index;
+      if (cell.classList.contains('map-tile-top-right')) borderIndexes.topRight = index;
+      if (cell.classList.contains('map-tile-bottom-left')) borderIndexes.bottomLeft = index;
+      if (cell.classList.contains('map-tile-bottom-right')) borderIndexes.bottomRight = index;
+      if (cell.classList.contains('map-tile-top')) borderIndexes.top.push(index);
+      if (cell.classList.contains('map-tile-bottom')) borderIndexes.bottom.push(index);
+      if (cell.classList.contains('map-tile-left')) borderIndexes.left.push(index);
+      if (cell.classList.contains('map-tile-right')) borderIndexes.right.push(index);
+
       if (cell.classList.contains('map-tile-top-left')
         || cell.classList.contains('map-tile-top-right')
         || cell.classList.contains('map-tile-bottom-left')
@@ -158,16 +178,8 @@ export default class GameController {
         || cell.classList.contains('map-tile-bottom')
         || cell.classList.contains('map-tile-left')
         || cell.classList.contains('map-tile-right')) {
-        borderIndexes.push(index);
+        borderIndexes.allBorders.push(index);
       }
-      // if (cell.classList.contains('map-tile-top-left')
-      //  || cell.classList.contains('map-tile-top-right')
-      //  || cell.classList.contains('map-tile-bottom-left')
-      //  || cell.classList.contains('map-tile-bottom-right')
-      //  || cell.classList.contains('map-tile-top')
-      //  || cell.classList.contains('map-tile-bottom')
-      //  || cell.classList.contains('map-tile-left')
-      //  || cell.classList.contains('map-tile-right'))
     });
     return borderIndexes;
   }
