@@ -151,7 +151,7 @@ export default class GameController {
     return message;
   }
 
-  /**
+  /** TODO delete or replace this function
    * @returns array of border's cells indexes
    */
   defineFieldBorders() {
@@ -191,7 +191,7 @@ export default class GameController {
     return borderIndexes;
   }
 
-  /**
+  /** TODO delete, replace or modify this function!
    * This method defines allowed moves for selected character
    * @param index index of selected cell
    * @returns array of allowed moves cells indexes
@@ -327,7 +327,7 @@ export default class GameController {
     return allowedMoves;
   }
 
-  /**
+  /** TODO deleete, replace or modify this function!!!
    * This method defines allowed attacks for selected character
    * @param index index of selected cell
    * @returns array of allowed attacks cells indexes
