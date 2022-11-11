@@ -97,7 +97,7 @@ export default class GameController {
     if (this.charactersPositions.includes(index)) {
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell instanceof Swordsman || characterInCell instanceof Bowman || characterInCell instanceof Magician) {
-        if (!isNaN(parseInt(this.selectedCell))/*this.selectedCell*/) {
+        if (!isNaN(parseInt(this.selectedCell, 10))) {
           this.gamePlay.deselectCell(this.selectedCell);
         }
         this.selectedCell = index;
