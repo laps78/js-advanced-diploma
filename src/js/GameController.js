@@ -42,7 +42,6 @@ export default class GameController {
       ],
     };
     this.charactersPositions = [];
-    this.init();
     this.players = ['player', 'cpu'];
     this.turn = this.players[0];
     this.selectedCell = null;
