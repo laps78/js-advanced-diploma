@@ -104,6 +104,7 @@ export default class GameController {
         if (!isNaN(parseInt(this.selectedCell.index, 10))) {
           this.gamePlay.deselectCell(this.selectedCell.index);
           this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
+          this.deHighlightAllowedAttacks(this.selectedCell.allowedAttacks);
           this.selectedCell.allowedMoves = null;
           this.selectedCell.allowedAttacks = null;
         }
@@ -111,8 +112,9 @@ export default class GameController {
         this.gamePlay.selectCell(this.selectedCell.index);
         // cell is selected. NEXT LOGICS
         this.selectedCell.allowedMoves = this.defineAllowedMoves(index); // defines allowed moves
-        this.highlightAllowedMoves(this.selectedCell.allowedMoves); // highlights allowed moves
-        this.selectedCell.allowedAttacks = null; // TODO define allowed attacks!
+        // this.highlightAllowedMoves(this.selectedCell.allowedMoves); // highlights allowed moves
+        this.selectedCell.allowedAttacks = this.defineAllowedAttacks(index); // TODO define allowed attacks!
+        this.highlightAllowedAttacks(this.selectedCell.allowedAttacks); // highligths allowed attacks
         // ... look up in oncellEnter
       } else {
         GamePlay.showError('It\'s an enemy, dude!');
@@ -123,6 +125,7 @@ export default class GameController {
   }
 
   onCellEnter(index) {
+    console.log(index);
     // TODO: react to mouse enter
     if (this.charactersPositions.includes(index)) {
       this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
@@ -193,6 +196,30 @@ export default class GameController {
   }
 
   /**
+   * this method highlights cells of allowed attacks
+   * @param array of allowed move indexes
+   * @returns nothing
+   */
+  highlightAllowedAttacks(array) {
+    array.forEach((attack) => {
+      this.gamePlay.cells[attack].classList.add('allowed-attack');
+      this.gamePlay.cells[attack].title = 'Thi cell is in attack range of selected unit!';
+    });
+  }
+
+  /**
+   * this method dehighlights cells of allowed attack
+   * @param array of allowed move indexes
+   * @returns nothing
+   */
+  deHighlightAllowedAttacks(array) {
+    array.forEach((attack) => {
+      this.gamePlay.cells[attack].classList.remove('allowed-attack');
+      this.gamePlay.cells[attack].title = '';
+    });
+  }
+
+  /**
    * This method defines allowed moves for current selected character
    * @param index index of selected cell
    * @param size is current boardsize
@@ -206,46 +233,86 @@ export default class GameController {
     const indexRow = Math.floor(index / size);
     const indexCol = index % size;
 
-    for (let i = 1; i <= range; i += 1) {
-      if (indexCol + i < size) {
-        allowedMoves.push(indexRow * size + (indexCol + i));
+    for (let step = 1; step <= range; step += 1) {
+      if (indexCol + step < size) {
+        allowedMoves.push(indexRow * size + (indexCol + step));
       }
-      if (indexCol - i >= 0) {
-        allowedMoves.push(indexRow * size + (indexCol - i));
+      if (indexCol - step >= 0) {
+        allowedMoves.push(indexRow * size + (indexCol - step));
       }
-      if (indexRow + i < size) {
-        allowedMoves.push((indexRow + i) * size + indexCol);
+      if (indexRow + step < size) {
+        allowedMoves.push((indexRow + step) * size + indexCol);
       }
-      if (indexRow - i >= 0) {
-        allowedMoves.push((indexRow - i) * size + indexCol);
+      if (indexRow - step >= 0) {
+        allowedMoves.push((indexRow - step) * size + indexCol);
       }
-      if (indexRow + i < size && indexCol + i < size) {
-        allowedMoves.push((indexRow + i) * size + (indexCol + i));
+      if (indexRow + step < size && indexCol + step < size) {
+        allowedMoves.push((indexRow + step) * size + (indexCol + step));
       }
-      if (indexRow - i >= 0 && indexCol - i >= 0) {
-        allowedMoves.push((indexRow - i) * size + (indexCol - i));
+      if (indexRow - step >= 0 && indexCol - step >= 0) {
+        allowedMoves.push((indexRow - step) * size + (indexCol - step));
       }
-      if (indexRow + i < size && indexCol - i >= 0) {
-        allowedMoves.push((indexRow + i) * size + (indexCol - i));
+      if (indexRow + step < size && indexCol - step >= 0) {
+        allowedMoves.push((indexRow + step) * size + (indexCol - step));
       }
-      if (indexRow - i >= 0 && indexCol + i < size) {
-        allowedMoves.push((indexRow - i) * size + (indexCol + i));
+      if (indexRow - step >= 0 && indexCol + step < size) {
+        allowedMoves.push((indexRow - step) * size + (indexCol + step));
       }
     }
     return allowedMoves.filter((move) => !this.charactersPositions.includes(move));
   }
 
-  /** TODO deleete, replace or modify this function!!!
+  /** TODO modify this function!!!
    * This method defines allowed attacks for selected character
    * @param index index of selected cell
    * @returns array of allowed attacks cells indexes
    */
   defineAllowedAttacks(index) {
+    const size = this.gamePlay.boardSize;
     const characterInCell = this.detectCharacterInCell(index).character;
+    const range = characterInCell.attackRange;
     const allowedAttacks = [];
-    for (let step = 1; step <= characterInCell.attackRange; step += 1) {
-      // some code
+    const indexRow = Math.floor(index / size);
+    const indexCol = index % size;
+
+    // дебажь это полностью!
+    console.log(
+      `index: ${index}`,
+      `indexRow(ряд): ${indexRow}`,
+      `indexCol(колонка): ${indexCol}`,
+      `Attack range: ${range}`,
+    );
+
+    for (let step = 1; step <= range; step += 1) {
+      if (indexCol + step < size) {
+        allowedAttacks.push(indexRow * size + (indexCol + step));
+      }
+      if (indexCol - step >= 0) {
+        allowedAttacks.push(indexRow * size + (indexCol - step));
+      }
+      if (indexRow + step < size) {
+        allowedAttacks.push((indexRow + step) * size + indexCol);
+      }
+      if (indexRow - step >= 0) {
+        allowedAttacks.push((indexRow - step) * size + indexCol);
+      }
+      if (indexRow + step < size && indexCol + step < size) { // если внизу справа есть место
+        allowedAttacks.push((indexRow + step) * size + (indexCol + step)); // идем вправо-вниз
+      }
+      if (indexRow - step >= 0 && indexCol - step >= 0) { // если вверху слева есть место
+        allowedAttacks.push((indexRow - step) * size + (indexCol - step)); // идем влево-вверх
+      }
+      if (indexRow + step < size && indexCol - step >= 0) { // если внизу слева есть место
+        allowedAttacks.push((indexRow + step) * size + (indexCol - step)); // идем влево-вниз
+      }
+      if (indexRow - step >= 0 && indexCol + step < size) { // если вверху справа есть место
+        allowedAttacks.push((indexRow - step) * size + (indexCol + step)); // идем вправо-вверх
+        // allowedAttacks.push((indexRow - step) * size + (indexCol + step) - 1 - step); // одну клетку влево
+        // allowedAttacks.push((indexRow - step) * size + (indexCol + step) + size); // одну клетку вниз
+      }
     }
+    // debugger;
+    console.log(allowedAttacks);
     return allowedAttacks;
   }
 

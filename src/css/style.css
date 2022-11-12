@@ -259,3 +259,10 @@ body {
   left: calc(var(--cell-size) * 0.4);
   top: calc(var(--cell-size) * 0.35);
 }
+
+.allowed-attack::after {
+  content: "⚔";
+  position: relative;
+  left: calc(var(--cell-size) * 0.4);
+  top: calc(var(--cell-size) * 0.35);
+}
