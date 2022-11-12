@@ -9,6 +9,7 @@ test('должен создаваться правильный маг', () => {
     defence: 40,
     moveRange: 1,
     attackRange: 4,
+    side: 'friendly',
   };
   expect(new Magician(2)).toEqual(etalonMagician);
 });

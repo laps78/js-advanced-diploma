@@ -8,5 +8,6 @@ export default class Vampire extends Character {
     this.defence = 25;
     this.moveRange = 2;
     this.attackRange = 2;
+    this.side = 'enemy';
   }
 }

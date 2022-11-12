@@ -8,5 +8,6 @@ export default class Magician extends Character {
     this.defence = 40;
     this.moveRange = 1;
     this.attackRange = 4;
+    this.side = 'friendly';
   }
 }

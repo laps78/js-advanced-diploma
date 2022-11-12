@@ -9,6 +9,7 @@ test('должен создаваться правильный лучник', ()
     defence: 25,
     moveRange: 2,
     attackRange: 2,
+    side: 'friendly',
   };
   expect(new Bowman(3)).toEqual(etalonBowman);
 });

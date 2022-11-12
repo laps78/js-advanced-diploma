@@ -96,7 +96,7 @@ export default class GameController {
     // TODO: react to click
     if (this.charactersPositions.includes(index)) {
       const characterInCell = this.detectCharacterInCell(index).character;
-      if (characterInCell instanceof Swordsman || characterInCell instanceof Bowman || characterInCell instanceof Magician) {
+      if (characterInCell.side === 'friendly') {
         if (!isNaN(parseInt(this.selectedCell, 10))) {
           this.gamePlay.deselectCell(this.selectedCell);
         }
@@ -110,13 +110,6 @@ export default class GameController {
     } else {
       GamePlay.showError('Nobody here, dude!');
     }
-  }
-
-  isPlayers(characterInCell) {
-    if (characterInCell instanceof Swordsman || characterInCell instanceof Bowman || characterInCell instanceof Magician) {
-      return true;
-    }
-    return false;
   }
 
   onCellEnter(index) {

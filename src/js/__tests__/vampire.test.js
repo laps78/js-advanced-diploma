@@ -9,6 +9,7 @@ test('должен создаваться правильный вампир', ()
     defence: 25,
     moveRange: 2,
     attackRange: 2,
+    side: 'enemy',
   };
   expect(new Vampire(2)).toEqual(etalonVampire);
 });
