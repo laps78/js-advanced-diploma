@@ -44,7 +44,11 @@ export default class GameController {
     this.charactersPositions = [];
     this.players = ['player', 'cpu'];
     this.turn = this.players[0];
-    this.selectedCell = null;
+    this.selectedCell = {
+      index: null,
+      allowedMoves: null,
+      allowedAttacks: null,
+    };
   }
 
   init() {
@@ -97,12 +101,18 @@ export default class GameController {
     if (this.charactersPositions.includes(index)) {
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell.side === 'friendly') {
-        if (!isNaN(parseInt(this.selectedCell, 10))) {
-          this.gamePlay.deselectCell(this.selectedCell);
+        if (!isNaN(parseInt(this.selectedCell.index, 10))) {
+          this.gamePlay.deselectCell(this.selectedCell.index);
+          this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
+          this.selectedCell.allowedMoves = null;
+          this.selectedCell.allowedAttacks = null;
         }
-        this.selectedCell = index;
-        this.gamePlay.selectCell(this.selectedCell);
+        this.selectedCell.index = index;
+        this.gamePlay.selectCell(this.selectedCell.index);
         // cell is selected. NEXT LOGICS
+        this.selectedCell.allowedMoves = this.defineAllowedMoves(index); // defines allowed moves
+        this.highlightAllowedMoves(this.selectedCell.allowedMoves); // highlights allowed moves
+        this.selectedCell.allowedAttacks = null; // TODO define allowed attacks!
         // ... look up in oncellEnter
       } else {
         GamePlay.showError('It\'s an enemy, dude!');
@@ -118,17 +128,21 @@ export default class GameController {
       this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
       // TODO change cursor if character in cell is player's
       const characterInCell = this.detectCharacterInCell(index).character;
-      if (this.isPlayers(characterInCell)) {
+      if (characterInCell.side === 'friendly') { // if friendly
         this.gamePlay.setCursor('pointer');
+      } else if (this.selectedCell.index !== null
+        && this.selectedCell.allowedAttacks !== null
+        && this.selectedCell.allowedAttacks.includes(index)
+        && this.detectCharacterInCell(index).character.side === 'enemy') {
+        this.gamePlay.setCursor('crosshair');
       } else {
         this.gamePlay.setCursor('not-allowed');
       }
+    } else if (this.selectedCell.index !== null && this.selectedCell.allowedMoves.includes(index)) {
       // TODO make cursor mark allowwed cells
-      if (this.selectedCell
-        && this.isPlayers(this.selectedCell)
-        && this.defineAllowedMoves().contains(index)) {
-        this.gamePlay.setCursor('crosshair');
-      }
+      this.gamePlay.setCursor('pointer');
+    } else {
+      this.gamePlay.setCursor('not-allowed');
     }
   }
 
@@ -152,6 +166,30 @@ export default class GameController {
     const characterInCell = this.detectCharacterInCell(index).character;
     const message = `🎖 ${characterInCell.level} ⚔ ${characterInCell.attack} 🛡 ${characterInCell.defence} ♥ ${characterInCell.health}`;
     return message;
+  }
+
+  /**
+   * this method highlights cells of allowed moves
+   * @param array of allowed move indexes
+   * @returns nothing
+   */
+  highlightAllowedMoves(array) {
+    array.forEach((move) => {
+      this.gamePlay.cells[move].classList.add('allowed-move');
+      this.gamePlay.cells[move].title = 'You can move selected unit here!';
+    });
+  }
+
+  /**
+   * this method highlights cells of allowed moves
+   * @param array of allowed move indexes
+   * @returns nothing
+   */
+  deHighlightAllowedMoves(array) {
+    array.forEach((move) => {
+      this.gamePlay.cells[move].classList.remove('allowed-move');
+      this.gamePlay.cells[move].title = '';
+    });
   }
 
   /**
@@ -194,7 +232,6 @@ export default class GameController {
         allowedMoves.push((indexRow - i) * size + (indexCol + i));
       }
     }
-    debugger;
     return allowedMoves.filter((move) => !this.charactersPositions.includes(move));
   }
 
