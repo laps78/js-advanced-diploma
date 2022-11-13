@@ -101,10 +101,12 @@ export default class GameController {
     if (this.charactersPositions.includes(index)) {
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell.side === 'friendly') {
-        if (!isNaN(parseInt(this.selectedCell.index, 10))) {
+        if (/* !isNaN(parseInt(this.selectedCell.index, 10))*/ this.selectedCell.index !== null) {
           this.gamePlay.deselectCell(this.selectedCell.index);
           this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
           this.deHighlightAllowedAttacks(this.selectedCell.allowedAttacks);
+          // clear this.selectedCell variable
+          this.selectedCell.index = null;
           this.selectedCell.allowedMoves = null;
           this.selectedCell.allowedAttacks = null;
         }
@@ -120,12 +122,19 @@ export default class GameController {
         GamePlay.showError('It\'s an enemy, dude!');
       }
     } else {
-      GamePlay.showError('Nobody here, dude!');
+      console.log(this.selectedCell.allowedMoves);
+      if (this.selectedCell.allowedMoves.includes(index)) {
+        console.log('can move');
+        this.detectCharacterInCell(this.selectedCell.index).character.position = index;
+        console.log(this.allCharactersOnMap);
+        this.gamePlay.redrawPositions(this.allCharactersOnMap);
+      } else {
+        GamePlay.showError('Nobody here, dude!');
+      }
     }
   }
 
   onCellEnter(index) {
-    console.log(index);
     // TODO: react to mouse enter
     if (this.charactersPositions.includes(index)) {
       this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
@@ -275,20 +284,36 @@ export default class GameController {
     const indexRow = Math.floor(index / size);
     const indexCol = index % size;
 
-    // дебажь это полностью!
-    console.log(
-      `index: ${index}`,
-      `indexRow(ряд): ${indexRow}`,
-      `indexCol(колонка): ${indexCol}`,
-      `Attack range: ${range}`,
-    );
-
     for (let step = 1; step <= range; step += 1) {
-      if (indexCol + step < size) {
-        allowedAttacks.push(indexRow * size + (indexCol + step));
+      if (indexCol + step < size) { // going right
+        const result = indexRow * size + (indexCol + step);
+        allowedAttacks.push(result);
+        if (step > 1) {
+          for (let i = 1; i < step; i += 1) {
+            if (result - (size * i) >= 0) { // fill up
+              allowedAttacks.push(result - size * i);
+            }
+            if (result + (size * i) <= (size * size) - 1) { // fill down
+              allowedAttacks.push(result + (size * i));
+            }
+          }
+        }
       }
-      if (indexCol - step >= 0) {
-        allowedAttacks.push(indexRow * size + (indexCol - step));
+      if (indexCol - step >= 0) { // going left
+        const result = indexRow * size + (indexCol - step);
+        allowedAttacks.push(result);
+        if (step > 1) {
+          for (let i = 1; i < step; i += 1) {
+            if (result - (size * i) >= 0) { // fill up
+              allowedAttacks.push(result - (size * i));
+            }
+          }
+          for (let i = 1; i < step; i += 1) {
+            if (result + (size * i) >= 0) { // fill down
+              allowedAttacks.push(result + (size * i));
+            }
+          }
+        }
       }
       if (indexRow + step < size) {
         allowedAttacks.push((indexRow + step) * size + indexCol);
@@ -297,22 +322,32 @@ export default class GameController {
         allowedAttacks.push((indexRow - step) * size + indexCol);
       }
       if (indexRow + step < size && indexCol + step < size) { // если внизу справа есть место
-        allowedAttacks.push((indexRow + step) * size + (indexCol + step)); // идем вправо-вниз
+        const result = (indexRow + step) * size + (indexCol + step);
+        allowedAttacks.push(result); // идем вправо-вниз
+        if (step > 1) {
+          for (let i = 1; i < step; i += 1) {
+            allowedAttacks.push(result - i);
+          }
+        }
       }
       if (indexRow - step >= 0 && indexCol - step >= 0) { // если вверху слева есть место
         allowedAttacks.push((indexRow - step) * size + (indexCol - step)); // идем влево-вверх
       }
       if (indexRow + step < size && indexCol - step >= 0) { // если внизу слева есть место
-        allowedAttacks.push((indexRow + step) * size + (indexCol - step)); // идем влево-вниз
+        const result = (indexRow + step) * size + (indexCol - step);
+        allowedAttacks.push(result); // идем влево-вниз
       }
       if (indexRow - step >= 0 && indexCol + step < size) { // если вверху справа есть место
-        allowedAttacks.push((indexRow - step) * size + (indexCol + step)); // идем вправо-вверх
-        // allowedAttacks.push((indexRow - step) * size + (indexCol + step) - 1 - step); // одну клетку влево
-        // allowedAttacks.push((indexRow - step) * size + (indexCol + step) + size); // одну клетку вниз
+        const result = (indexRow - step) * size + (indexCol + step);
+        allowedAttacks.push(result); // идем вправо-вверх
+        if (step > 1) {
+          for (let i = 1; i < step; i += 1) {
+            allowedAttacks.push(result - i);
+          }
+        }
       }
     }
     // debugger;
-    console.log(allowedAttacks);
     return allowedAttacks;
   }
 
