@@ -19,23 +19,7 @@ export default class GameController {
       teamCount: 3, // team size
       playerTeamAllowedTypes: [Swordsman, Bowman, Magician], // allowed characters for player's team
       cpuTeamAllowedTypes: [Daemon, Undead, Vampire], // allowed characters for CPU's team
-      playerAllowedPositions: [
-        0,
-        1,
-        8,
-        9,
-        16,
-        17,
-        24,
-        25,
-        32,
-        33,
-        40,
-        41,
-        48,
-        49,
-        56,
-        57, // possible start positions for player's team
+      playerAllowedPositions: [0, 1, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56, 57, // possible start positions for player's team
       ],
       cpuAllowedPositions: [
         6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55, 62, 63, // possible start positions for CPU's team
@@ -101,7 +85,7 @@ export default class GameController {
     if (this.charactersPositions.includes(index)) {
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell.side === 'friendly') {
-        if (/* !isNaN(parseInt(this.selectedCell.index, 10))*/ this.selectedCell.index !== null) {
+        if (this.selectedCell.index !== null) {
           this.gamePlay.deselectCell(this.selectedCell.index);
           this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
           this.deHighlightAllowedAttacks(this.selectedCell.allowedAttacks);
@@ -114,7 +98,7 @@ export default class GameController {
         this.gamePlay.selectCell(this.selectedCell.index);
         // cell is selected. NEXT LOGICS
         this.selectedCell.allowedMoves = this.defineAllowedMoves(index); // defines allowed moves
-        // this.highlightAllowedMoves(this.selectedCell.allowedMoves); // highlights allowed moves
+        this.highlightAllowedMoves(this.selectedCell.allowedMoves); // highlights allowed moves
         this.selectedCell.allowedAttacks = this.defineAllowedAttacks(index); // TODO define allowed attacks!
         this.highlightAllowedAttacks(this.selectedCell.allowedAttacks); // highligths allowed attacks
         // ... look up in oncellEnter
@@ -122,6 +106,7 @@ export default class GameController {
         GamePlay.showError('It\'s an enemy, dude!');
       }
     } else {
+      // folowing logics should make selected character move
       console.log(this.selectedCell.allowedMoves);
       if (this.selectedCell.allowedMoves.includes(index)) {
         console.log('can move');
