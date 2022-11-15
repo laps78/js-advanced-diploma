@@ -67,7 +67,7 @@ export default class GameController {
     /* render */
     // Создаем массив всех персонажей на поле
     this.allCharactersOnMap = [...this.cpuTeam.characters, ...this.playerTeam.characters];
-    // вносим координаты всех персонажей в массив координат
+    // вносим координаты всех персонажей в массив координат персонажей
     this.charactersPositions = this.allCharactersOnMap.map((character) => character.position);
     // отрисовываем персонажей на поле
     this.gamePlay.redrawPositions(this.allCharactersOnMap);
@@ -86,13 +86,7 @@ export default class GameController {
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell.side === 'friendly') {
         if (this.selectedCell.index !== null) {
-          this.gamePlay.deselectCell(this.selectedCell.index);
-          this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
-          this.deHighlightAllowedAttacks(this.selectedCell.allowedAttacks);
-          // clear this.selectedCell variable
-          this.selectedCell.index = null;
-          this.selectedCell.allowedMoves = null;
-          this.selectedCell.allowedAttacks = null;
+          this.deselectCell();
         }
         this.selectedCell.index = index;
         this.gamePlay.selectCell(this.selectedCell.index);
@@ -107,12 +101,12 @@ export default class GameController {
       }
     } else {
       // folowing logics should make selected character move
-      console.log(this.selectedCell.allowedMoves);
       if (this.selectedCell.allowedMoves.includes(index)) {
-        console.log('can move');
-        this.detectCharacterInCell(this.selectedCell.index).character.position = index;
-        console.log(this.allCharactersOnMap);
-        this.gamePlay.redrawPositions(this.allCharactersOnMap);
+        this.makeMove(this.selectedCell.index, index);
+        this.deselectCell();
+      } else if (this.detectCharacterInCell(this.selectedCell.index).character.side === 'enemy'
+        && this.selectedCell.allowedAttacks.includes(index)) {
+        console.log('do attack!!!');
       } else {
         GamePlay.showError('Nobody here, dude!');
       }
@@ -121,12 +115,12 @@ export default class GameController {
 
   onCellEnter(index) {
     // TODO: react to mouse enter
-    if (this.charactersPositions.includes(index)) {
-      this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index);
+    if (this.charactersPositions.includes(index)) { // если кто-то есть
+      this.gamePlay.showCellTooltip(this.showCharacterInCellInfo(index), index); // показать статус
       // TODO change cursor if character in cell is player's
       const characterInCell = this.detectCharacterInCell(index).character;
       if (characterInCell.side === 'friendly') { // if friendly
-        this.gamePlay.setCursor('pointer');
+        this.gamePlay.setCursor('pointer'); // поменять курсор
       } else if (this.selectedCell.index !== null
         && this.selectedCell.allowedAttacks !== null
         && this.selectedCell.allowedAttacks.includes(index)
@@ -138,6 +132,10 @@ export default class GameController {
     } else if (this.selectedCell.index !== null && this.selectedCell.allowedMoves.includes(index)) {
       // TODO make cursor mark allowwed cells
       this.gamePlay.setCursor('pointer');
+    } else if (this.selectedCell.index !== null
+      && this.detectCharacterInCell(this.selectedCell.index).character.side === 'enemy'
+      && this.selectedCell.allowedAttacks.includes(index)) {
+      this.gamePlay.setCursor('crosshair');
     } else {
       this.gamePlay.setCursor('not-allowed');
     }
@@ -163,6 +161,30 @@ export default class GameController {
     const characterInCell = this.detectCharacterInCell(index).character;
     const message = `🎖 ${characterInCell.level} ⚔ ${characterInCell.attack} 🛡 ${characterInCell.defence} ♥ ${characterInCell.health}`;
     return message;
+  }
+
+  /**
+   * this method makes deselect cell routine operations
+   */
+  deselectCell() {
+    this.deHighlightAllowedMoves(this.selectedCell.allowedMoves);
+    this.deHighlightAllowedAttacks(this.selectedCell.allowedAttacks);
+    this.gamePlay.deselectCell(this.selectedCell.index);
+    this.selectedCell.index = null;
+    this.selectedCell.allowedAttacks = [];
+    this.selectedCell.allowedMoves = [];
+  }
+
+  /**
+   * this method change selected character position value to 'moveTo' & redraws cells
+   * @param index is current selectedCell index
+   * @param moveTo is index on which to move
+   */
+  makeMove(index, moveTo) {
+    const characterToMove = this.detectCharacterInCell(index);
+    characterToMove.position = moveTo;
+    this.charactersPositions = this.allCharactersOnMap.map((character) => character.position);
+    this.gamePlay.redrawPositions(this.allCharactersOnMap);
   }
 
   /**

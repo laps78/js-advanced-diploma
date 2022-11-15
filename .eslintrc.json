@@ -12,6 +12,7 @@
         "sourceType": "module"
     },
     "rules": {
+      "no-lonely-if": "off",
       "max-len": "off",
       "no-unused-vars": "warn",
       "no-alert": "off",
