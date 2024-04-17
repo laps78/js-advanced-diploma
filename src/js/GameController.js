@@ -8,6 +8,8 @@ import Undead from './characters/Undead';
 import Vampire from './characters/Vampire';
 import PositionedCharacter from './PositionedCharacter';
 import GamePlay from './GamePlay';
+//TODO проверь импорт - не уверен по пути
+import fieldArray2Coords from "./helpers/array2coordinates.helper.js";
 
 export default class GameController {
   constructor(gamePlay, stateService) {
